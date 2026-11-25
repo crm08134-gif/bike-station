@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>분석의 한계</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%228%22 r=%226%22 fill=%22%232a78d6%22/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <a class="link" href="./index.html">← 지도로 돌아가기</a>
+      <h1>분석의 한계</h1>
+      <p>지도에 보이는 대여소 위치는 아래 가정과 데이터 범위 안에서 나온 결과입니다. 실제 설치 위치를 정하기 전에 함께 봐야 합니다.</p>
+
+      <h2>지금 데이터 상태</h2>
+      <p class="muted small">이 목록은 API에서 받아 매번 새로 만듭니다.</p>
+      <div id="error" class="error" role="alert" hidden style="padding: 10px 14px; border-radius: 8px"></div>
+      <ul id="status" class="status-list">
+        <li class="muted">불러오는 중…</li>
+      </ul>
+
+      <h2>수요 데이터</h2>
+      <ul>
+        <li><strong>표본이 작고 편향될 수 있습니다.</strong> AI Hub '교통수단판별 데이터'의 자전거 통행(2022-09-15 ~ 10-30)만 씁니다. 수집에 참여한 사람들의 통행이라 서울 전체 자전거 수요를 대표하지 않고, 통행 수가 적어 한두 통행이 결과를 바꿀 수 있습니다.</li>
+        <li><strong>관측되지 않은 구간은 추정입니다.</strong> 원본은 5분마다 1분 조각이 빠져 있고, 5분 전체가 빠지기도 합니다. 끊긴 조각은 정해 둔 공백 상한(위 '통행 단위')까지만 한 통행으로 잇고, 그 사이 경로는 자전거 최단경로로 가정했습니다.</li>
+        <li><strong>경로는 맵매칭 결과입니다.</strong> GPS를 OSRM으로 도로에 맞췄습니다. 도로망에 없는 길을 지난 곳은 관측 궤적으로 이었고, 지도에는 직선으로 그려집니다.</li>
+      </ul>
+
+      <h2>대여소 후보와 접근</h2>
+      <ul>
+        <li><strong>후보지는 200m 격자의 칸 중심입니다.</strong> 부지, 도로 폭, 소유권 같은 설치 가능성은 보지 않았습니다. 실제 설치 가능한 자리와 최대 141m 떨어질 수 있습니다.</li>
+        <li><strong>도보 접근은 직선거리입니다.</strong> 대여소에서 통행 경로까지 직선거리로 도보 반경(위 '도보 반경') 안이면 걸어서 닿는다고 봅니다. 실제 보행 경로, 횡단보도, 경사는 반영하지 않았습니다.</li>
+      </ul>
+
+      <h2>목적함수와 최적화</h2>
+      <ul>
+        <li><strong>혜택은 '대여소 사이를 탈 수 있는 거리'만 셉니다.</strong> 통행 경로 위에서 두 대여소 사이 구간이 500m 이상일 때만 혜택으로 봅니다. 대여소 용량, 자전거 재배치, 대여소가 생겨서 새로 늘어나는 수요는 반영하지 않습니다.</li>
+        <li><strong>최적 배치는 하나가 아닙니다.</strong> 목적값이 같은 다른 배치가 있을 수 있어, 지도에 보이는 위치는 그중 하나입니다. 부트스트랩 선택 빈도로 위치가 얼마나 안정적인지 볼 예정입니다.</li>
+        <li><strong>대여소를 많이 두면 상한에 닿습니다.</strong> 후보지를 전부 골랐을 때의 값(상한)에 닿은 뒤로는 대여소를 늘려도 목적값이 늘지 않습니다.</li>
+        <li><strong>두 목적함수는 답이 다릅니다.</strong> '거리 합'은 긴 통행에, '통행 비율 합'은 짧은 통행에 상대적으로 무게를 줍니다. 어느 쪽이 맞는지는 정책 목표에 달려 있습니다.</li>
+      </ul>
+
+      <h2>지도 표시</h2>
+      <ul>
+        <li><strong>구 경계는 표시용으로 단순화했습니다.</strong> 구마다 따로 단순화해서, 크게 확대하면 인접한 구 사이에 폭 수 m의 틈이나 겹침이 보일 수 있습니다. 구별 집계는 단순화 전 경계로 계산합니다.</li>
+      </ul>
+    </main>
+    <script type="module" src="/src/limits.ts"></script>
+  </body>
+</html>

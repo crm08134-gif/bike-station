@@ -1,0 +1,61 @@
+# 전체 실행 (DB + Spring API + 웹). 저장소 루트에서:
+#   켜기: docker compose up -d --build     (코드를 안 바꿨으면 --build 생략 가능)
+#   끄기: docker compose stop              (데이터는 볼륨에 남는다. down -v 는 데이터까지 지운다)
+# 비밀번호·포트는 같은 폴더의 .env (저장소에 넣지 않음, .env.example 참고)에서 읽는다.
+name: bike-station
+
+services:
+  db:
+    # 결과 DB (PostGIS). 8단계 GeoParquet을 9단계 적재 스크립트가 넣고, Spring은 읽기 전용 계정으로 조회한다.
+    # 재현성을 위해 버전을 고정한다 (PostgreSQL 16, PostGIS 3.4)
+    image: postgis/postgis:16-3.4
+    container_name: bike-postgis
+    environment:
+      POSTGRES_DB: bike_station
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${BIKE_PG_ADMIN_PASSWORD:?BIKE_PG_ADMIN_PASSWORD를 설정하세요}
+    ports:
+      - "${BIKE_PG_PORT:-5432}:5432"
+    volumes:
+      - bike_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bike_station"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  api:
+    # Spring Boot API (api/Dockerfile). 컨테이너끼리는 서비스 이름(db)으로 접속한다.
+    build: ./api
+    container_name: bike-api
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/bike_station
+      DB_PASSWORD: ${BIKE_READER_PASSWORD:?BIKE_READER_PASSWORD를 설정하세요}
+      # npm run dev(5173)로 화면을 고칠 때도 이 API를 쓸 수 있게 둘 다 허용한다
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:${BIKE_WEB_PORT:-3000}
+    ports:
+      - "${BIKE_API_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    # 지도 웹 (web/Dockerfile). 빌드한 dist/를 nginx가 서빙하고 /api/ 는 api 컨테이너로 넘긴다.
+    build:
+      context: ./web
+      args:
+        # 브라우저가 보는 주소 = 웹 주소 자신 (nginx가 /api/ 를 넘겨 주므로 CORS가 필요 없다)
+        VITE_API_BASE: http://localhost:${BIKE_WEB_PORT:-3000}
+    container_name: bike-web
+    ports:
+      - "${BIKE_WEB_PORT:-3000}:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  bike_pgdata:
+    # 예전 docker/postgis 구성에서 쓰던 볼륨을 그대로 이어 쓴다 (데이터 재적재 불필요)
+    name: postgis_bike_pgdata

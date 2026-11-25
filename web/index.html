@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>자전거 공유소 입지</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Ccircle cx=%228%22 cy=%228%22 r=%226%22 fill=%22%232a78d6%22/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div class="app">
+      <aside class="panel" aria-label="시나리오와 결과">
+        <header class="panel-head">
+          <h1>자전거 공유소 입지</h1>
+          <p class="muted">서울 자전거 통행 기록으로 고른 대여소 위치</p>
+          <a class="link" href="./limits.html">분석의 한계와 데이터 상태 →</a>
+        </header>
+
+        <div id="error" class="error" role="alert" hidden></div>
+
+        <section aria-labelledby="h-scenario">
+          <h2 id="h-scenario">시나리오</h2>
+          <div id="conditions" class="conditions"></div>
+          <p id="mode-help" class="muted small"></p>
+          <div class="slider">
+            <label for="p-slider">대여소 수 <output id="p-value" for="p-slider"></output></label>
+            <input type="range" id="p-slider" min="0" max="0" step="1" value="0" />
+            <div id="p-ticks" class="ticks" aria-hidden="true"></div>
+          </div>
+        </section>
+
+        <section aria-labelledby="h-result" id="result">
+          <h2 id="h-result">결과</h2>
+          <div id="tiles" class="tiles"></div>
+        </section>
+
+        <section aria-labelledby="h-curve">
+          <h2 id="h-curve">커버리지 곡선</h2>
+          <p class="muted small">대여소를 늘릴 때 목적값이 상한(후보지를 전부 골랐을 때)에 얼마나 다가가는지. 점을 누르면 그 대여소 수로 바뀝니다.</p>
+          <div id="curve"></div>
+        </section>
+
+        <section aria-labelledby="h-detail">
+          <h2 id="h-detail">선택 정보</h2>
+          <div id="detail"></div>
+        </section>
+
+        <section aria-labelledby="h-compare">
+          <h2 id="h-compare">기존 대여소 비교</h2>
+          <div id="compare"></div>
+        </section>
+
+        <section aria-labelledby="h-layers">
+          <h2 id="h-layers">지도 표시</h2>
+          <div class="toggles">
+            <label><input type="checkbox" id="show-routes" checked /> 통행 선</label>
+            <label><input type="checkbox" id="show-districts" checked /> 구 경계</label>
+            <label><input type="checkbox" id="show-existing" /> 기존 대여소</label>
+          </div>
+          <ul class="legend">
+            <li><span class="key dot station"></span>선택한 대여소 (혜택 구간의 끝으로 쓰임)</li>
+            <li><span class="key dot idle"></span>선택했지만 끝으로 쓰이지 않은 대여소</li>
+            <li><span class="key dot existing"></span>기존 따릉이 대여소 (누르면 이름·번호)</li>
+            <li><span class="key line benefit"></span>혜택 받는 통행 (대여소 사이를 탈 수 있음)</li>
+            <li><span class="key line none"></span>혜택 없는 통행</li>
+            <li><span class="key line highlight"></span>누른 대여소의 도보 반경 안 통행</li>
+          </ul>
+        </section>
+      </aside>
+
+      <main id="map" class="map" aria-label="대여소 지도"></main>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

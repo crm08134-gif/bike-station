@@ -1,0 +1,14 @@
+# 분석 파이프라인 (src/, tests/) 공통 패키지. 1단계 비교 실험(s1_bench_*)에만 쓰는 맵매칭 엔진은 넣지 않았다.
+pandas
+numpy
+pyarrow
+pyproj
+sqlalchemy
+psycopg2-binary
+shapely
+geopandas
+matplotlib
+datasketch
+scipy
+# 기존 대여소 엑셀 읽기 (load_existing_stations.py, pd.read_excel)
+openpyxl

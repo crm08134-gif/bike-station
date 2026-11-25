@@ -1,0 +1,17 @@
+# 비밀번호가 들어가는 파일
+.env
+!.env.example
+
+# 데이터 (원본 GPS·중간 결과·내보내기: 크기와 개인 위치 정보 때문에 저장소에 넣지 않는다)
+data/
+
+# 빌드 산출물·의존성
+api/build/
+api/.gradle/
+web/node_modules/
+web/dist/
+__pycache__/
+*.pyc
+
+# IDE
+.idea/

@@ -1,0 +1,35 @@
+# 접속 정보는 환경변수로만 받는다. 저장소에 비밀번호를 두지 않는다.
+#   DB_URL      예) jdbc:postgresql://localhost:5432/bike_station
+#   DB_USERNAME 9단계 sql/schema.sql이 만든 읽기 전용 계정 (기본 bike_reader)
+#   DB_PASSWORD schema.sql 실행 때 준 reader_password
+spring:
+  application:
+    name: bikestation
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME:bike_reader}
+    password: ${DB_PASSWORD}
+    hikari:
+      read-only: true
+      maximum-pool-size: 5
+  jpa:
+    # 스키마는 Python 쪽(sql/schema.sql)이 소유한다. Spring은 엔티티가 테이블과 맞는지 확인만 하고 바꾸지 않는다.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+bikestation:
+  cors:
+    # 프론트엔드 주소 (쉼표로 여러 개). 11단계 개발 서버 기본값
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  coverage:
+    # /api/stations/{id}/coverage 기본 도보 반경 (m). 4단계 S4_WALK_M과 같다
+    default-radius-m: 300
+  districts:
+    # /api/districts 경계 단순화 허용오차 (m, EPSG:5179에서 적용한 뒤 4326으로 변환).
+    # 실데이터 비교 (2026-09-29): 0m 124KB / 5m 63KB, 인접 구 겹침 1.1만 m², 서울 안쪽 틈 1.2만 m² (가는 조각 50개) / 10m 53KB
+    simplify-tolerance-m: 5
+
+logging:
+  level:
+    api.timing: INFO
